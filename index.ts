@@ -3,6 +3,8 @@ import url = require("url");
 import queryString = require("querystring");
 import cheerio = require("cheerio");
 
+import { getNodeLoc } from "./location";
+
 interface IVisiter {
    onBeforeVisit?: (node: CheerioElement) => void;
    onAfterVisit?: (node: CheerioElement) => void;
@@ -11,11 +13,17 @@ interface IVisiter {
    onStyle?: (node: CheerioElement) => void;
    onText?: (node: CheerioElement) => void;
    onComment?: (node: CheerioElement) => void;
-   context: {};
+   context: {
+      html: string,
+      currentNode: CheerioElement | null
+   };
 }
 
 export let visiter: IVisiter = {
-   context: {}
+   context: {
+      html: "",
+      currentNode: null
+   }
 };
 
 export function loader(source: string, map: any) {
@@ -24,7 +32,12 @@ export function loader(source: string, map: any) {
    try {
       source = process(source);
    } catch (err) {
-      this.callback(err);
+      let message = (typeof err === "string") ? err : err.message;
+      if (visiter.context.currentNode) {
+         const { pos } = getNodeLoc(visiter.context, visiter.context.currentNode);
+         message += ` in line ${pos.line}, col ${pos.col}`;
+      }
+      this.callback(new Error(message));
       return;
    }
    this.callback(null, source, map);
@@ -35,6 +48,9 @@ function process(source: string) {
    const rootNode = cheerio.load(source, cheerioOptions); 
    const rootTags = _.filter(rootNode.root()[0].children, node => node.type === "tag" || node.type === "style");
    const root = rootTags[0] as CheerioElement;
+
+   visiter.context.html = rootNode.root().html();
+   visiter.context.currentNode = root;
 
    if (visiter.onBeforeVisit) {
       visiter.onBeforeVisit(root);
@@ -57,6 +73,8 @@ function visit(node: CheerioElement): void {
 }
 
 function visitTagNode(node: CheerioElement): void {
+   visiter.context.currentNode = node;
+
    if (visiter.onBeforeTag) {
       visiter.onBeforeTag(node);
    }
@@ -69,18 +87,24 @@ function visitTagNode(node: CheerioElement): void {
 }
 
 function visitStyleNode(node: CheerioElement): void {
+   visiter.context.currentNode = node;
+
    if (visiter.onStyle) {
       visiter.onStyle(node);
    }
 }
 
 function visitCommentNode(node: CheerioElement): void {
+   visiter.context.currentNode = node;
+
    if (visiter.onComment) {
       visiter.onComment(node);
    }
 }
 
 function visitTextNode(node: CheerioElement): void {
+   visiter.context.currentNode = node;
+
    if (visiter.onText) {
       visiter.onText(node);
    }
