@@ -1,6 +1,6 @@
 {
   "name": "react-templates-preprocess-loader",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Preprocess react-templates as Webpack loader",
   "main": "index.js",
   "author": "Antonino Porcino",
