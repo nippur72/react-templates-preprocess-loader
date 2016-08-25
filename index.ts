@@ -3,21 +3,18 @@ import url = require("url");
 import queryString = require("querystring");
 import cheerio = require("cheerio");
 
-type visitFunction = ((node: CheerioElement) => void) | undefined;
-
 interface IVisiter {
-   onTag: visitFunction;
-   onStyle: visitFunction;
-   onText: visitFunction;
-   onComment: visitFunction;
+   onBeforeVisit?: (node: CheerioElement) => void;
+   onAfterVisit?: (node: CheerioElement) => void;
+   onBeforeTag?: (node: CheerioElement) => void;
+   onAfterTag?: (node: CheerioElement) => void;
+   onStyle?: (node: CheerioElement) => void;
+   onText?: (node: CheerioElement) => void;
+   onComment?: (node: CheerioElement) => void;
    context: {};
 }
 
 export let visiter: IVisiter = {
-   onTag: undefined,
-   onStyle: undefined,
-   onText: undefined,
-   onComment: undefined,
    context: {}
 };
 
@@ -33,7 +30,15 @@ function process(source: string) {
    const rootTags = _.filter(rootNode.root()[0].children, node => node.type === "tag" || node.type === "style");
    const root = rootTags[0] as CheerioElement;
 
+   if (visiter.onBeforeVisit) {
+      visiter.onBeforeVisit(root);
+   } 
+
    visit(root);
+
+   if (visiter.onAfterVisit) {
+      visiter.onAfterVisit(root);
+   }
 
    return rootNode.root().html();
 }
@@ -46,8 +51,14 @@ function visit(node: CheerioElement): void {
 }
 
 function visitTagNode(node: CheerioElement): void {
-   if (visiter.onTag) {
-      visiter.onTag(node);
+   if (visiter.onBeforeTag) {
+      visiter.onBeforeTag(node);
+   }
+
+   _.each(node.children, child => visit(child));
+
+   if (visiter.onAfterTag) {
+      visiter.onAfterTag(node);
    }
 }
 
