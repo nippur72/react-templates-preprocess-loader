@@ -27,7 +27,7 @@ export function loader(source: string, map: any) {
       this.callback(err);
       return;
    }
-   this.callback(source, map);
+   this.callback(null, source, map);
 };
 
 function process(source: string) {
