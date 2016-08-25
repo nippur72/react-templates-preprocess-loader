@@ -1,0 +1,25 @@
+{
+  "name": "react-templates-preprocess-loader",
+  "version": "0.0.1",
+  "description": "Preprocess react-templates as Webpack loader",
+  "main": "index.js",
+  "author": "Antonino Porcino",
+  "typings": "./index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nippur72/react-templates-preprocess-loader.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@types/cheerio": "^0.17.29",
+    "@types/lodash": "0.0.27",
+    "cheerio": "^0.20.0",
+    "lodash": "^4.13.1"
+  },
+  "devDependencies": {
+    "typescript": "^2.1.0-dev.20160825"
+  }
+}
