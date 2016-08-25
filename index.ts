@@ -18,10 +18,16 @@ export let visiter: IVisiter = {
    context: {}
 };
 
-export function loader(source: string): string {
+export function loader(source: string, map: any) {
    const query = queryString.parse(url.parse(this.query).query);
    this.cacheable && this.cacheable();
-   return process(source);
+   try {
+      source = process(source);
+   } catch (err) {
+      this.callback(err);
+      return;
+   }
+   this.callback(source, map);
 };
 
 function process(source: string) {
@@ -32,7 +38,7 @@ function process(source: string) {
 
    if (visiter.onBeforeVisit) {
       visiter.onBeforeVisit(root);
-   } 
+   }
 
    visit(root);
 
