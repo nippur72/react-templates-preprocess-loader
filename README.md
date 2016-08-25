@@ -77,7 +77,7 @@ visiter.onBeforeTag = node => {
 module.exports = loader;
 ```
 
-Last step is to chain the created loader into webpack loader, just before `react-templates-loader`:
+Last step is to add the newly created loader into webpack chain of loaders, just before `react-templates-loader`:
 
 In `webpack.config.js`:
 ```js
